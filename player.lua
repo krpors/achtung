@@ -4,6 +4,8 @@ Player.__index = Player
 function Player.new()
 	local self = setmetatable({}, Player)
 
+	self.dying = false
+
 	self.moveLeft = false
 	self.moveRight = false
 
@@ -56,6 +58,9 @@ end
 
 -- Player is always moving, until death.
 function Player:update(dt)
+	if self.dying then
+		self.dead = true
+	end
 	if self.dead then
 		return
 	end
@@ -119,18 +124,6 @@ function Player:update(dt)
 	end
 end
 
---[[
--- Funky collision function to check circle intersections, using Pythagoras'
--- theorem (a² + b² = c²). The parameters coord1 and coord2 are expected to be
--- tables with an x and y property, e.g. coord1.x and coord1.y.
---]]
-function isColliding(coord1, radius1, coord2, radius2)
-	local dx = coord2.x - coord1.x
-	local dy = coord2.y - coord1.y
-	local dist = math.sqrt(dx * dx + dy * dy)
-	return dist < (radius1 + radius2)
-end
-
 function Player:stop()
 end
 
@@ -146,6 +139,28 @@ end
 function Player:stop()
 	self.moveLeft = false
 	self.moveRight = false
+end
+
+function Player:die()
+	self.dying = true
+end
+
+--[[
+-- Checks if the current position of the player collides with the path of
+-- the given otherPlayer by checking the otherPlayer's history table.
+--]]
+function Player:collidesWith(otherPlayer)
+	print("Size of otherPlayer's history: " .. #otherPlayer.history)
+	for i = 1, #otherPlayer.history do
+		otherPos = {
+			x = otherPlayer.history[i].x,
+			y = otherPlayer.history[i].y
+		}
+		if isColliding(self.pos, self.size, otherPos, otherPlayer.size) then
+			return true
+		end
+	end
+	return false
 end
 
 function Player:draw()
