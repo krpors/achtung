@@ -6,8 +6,9 @@ local player2
 
 function love.load()
 	player1 = Player.new()
-	player1.color = { r = 122, g = 222, b= 222 }
+	player1.color = { r = 255, g = 0, b = 0}
 	player2 = Player.new()
+	player2.color = { r = 0, g = 255, b = 0}
 end
 
 function love.update(dt)
@@ -15,6 +16,7 @@ function love.update(dt)
 	if delta >= 0.2 then
 		delta = 0
 	end
+
 	player1:update(dt)
 	player2:update(dt)
 
@@ -30,6 +32,7 @@ function love.draw()
 	player1:draw()
 	player2:draw()
 end
+
 function love.keypressed(key)
 	if key == 'escape' then love.event.quit()
 	elseif key == 'left' then player1:left()
@@ -47,17 +50,4 @@ function love.keyreleased(key)
 		player2:stop()
 	end
 end
-
---[[
--- Funky collision function to check circle intersections, using Pythagoras'
--- theorem (a² + b² = c²). The parameters coord1 and coord2 are expected to be
--- tables with an x and y property, e.g. coord1.x and coord1.y.
---]]
-function isColliding(coord1, radius1, coord2, radius2)
-	local dx = coord2.x - coord1.x
-	local dy = coord2.y - coord1.y
-	local dist = math.sqrt(dx * dx + dy * dy)
-	return dist < (radius1 + radius2)
-end
-
 

@@ -1,3 +1,5 @@
+require "util"
+
 Player = {}
 Player.__index = Player
 
@@ -119,7 +121,7 @@ function Player:update(dt)
 	-- check if we are colliding with ourselves. If so, we lost.
 	for i = 1, #self.history - 10 do
 		-- we subtract 2 from the self.size to lower the preciseness a bit of collision.
-		if isColliding(self.pos, self.size, self.history[i], self.size - 2) then
+		if util:isColliding(self.pos, self.size, self.history[i], self.size - 2) then
 			self.dead = true
 		end
 	end
@@ -156,7 +158,7 @@ function Player:collidesWith(otherPlayer)
 			x = otherPlayer.history[i].x,
 			y = otherPlayer.history[i].y
 		}
-		if isColliding(self.pos, self.size, otherPos, otherPlayer.size) then
+		if util:isColliding(self.pos, self.size, otherPos, otherPlayer.size) then
 			return true
 		end
 	end
