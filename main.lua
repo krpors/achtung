@@ -12,7 +12,7 @@ end
 
 function love.update(dt)
 	delta = delta + dt
-	if delta >= 1.0 then
+	if delta >= 0.2 then
 		delta = 0
 	end
 	player:update(dt)
