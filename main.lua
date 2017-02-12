@@ -10,9 +10,6 @@ function love.load()
 	player2 = Player.new()
 end
 
-function love.conf(t)
-end
-
 function love.update(dt)
 	delta = delta + dt
 	if delta >= 0.2 then

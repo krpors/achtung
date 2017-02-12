@@ -16,7 +16,6 @@ function Player.new()
 
 	-- Initialize random seed to place the player at a random position and
 	-- a random direction.
-	math.randomseed(os.time())
 
 	-- Thie history table, contains coordinates of all the positions the player
 	-- has visited. This table is used for drawing the path the player has gone
@@ -36,15 +35,17 @@ function Player.new()
 	-- Size of the player (radius)
 	self.size = 5
 	-- Rotation (direction) the player starts at.
-	self.rot = math.random() * 2 * math.pi
+	self.rot = love.math.random() * 2 * math.pi
 	-- Speed
 	self.velocity = 120
 
 	-- The player's current (initial) position.
 	self.pos = {
-		x = math.random() * love.window.getWidth(),
-		y = math.random() * love.window.getHeight()
+		x = love.math.random() * love.window.getWidth(),
+		y = love.math.random() * love.window.getHeight()
 	}
+
+	print("Player: " .. self.rot .. " at (x,y) = (" .. math.floor(self.pos.x) .. "," .. math.floor(self.pos.y) .. ")")
 
 	-- Our previous position, to calculate how many pixels we diverged, to know
 	-- whether we should insert something in the history table.
@@ -150,7 +151,6 @@ end
 -- the given otherPlayer by checking the otherPlayer's history table.
 --]]
 function Player:collidesWith(otherPlayer)
-	print("Size of otherPlayer's history: " .. #otherPlayer.history)
 	for i = 1, #otherPlayer.history do
 		otherPos = {
 			x = otherPlayer.history[i].x,
@@ -179,8 +179,10 @@ function Player:draw()
 
 	love.graphics.line(self.pos.x, self.pos.y, endx, endy)
 
+	--[[
 	love.graphics.setColor(255, 0, 0)
 	love.graphics.print("Table size: " .. #self.history, 10, 10)
 	love.graphics.print("(x, y) = (" .. self.pos.x .. "," .. self.pos.y .. ")", 10, 25)
 	love.graphics.print("rot = " .. self.rot, 10, 35)
+	--]]
 end
