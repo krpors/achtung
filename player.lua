@@ -1,4 +1,5 @@
 require "util"
+require "pgen"
 
 Player = {}
 Player.__index = Player
@@ -26,7 +27,6 @@ function Player.new()
 
 	-- Counter is used to draw a gap in the player's path.
 	self.counter = 0
-
 
 	-- Color of the player as a table with r, g, b properties.
 	self.color = {
@@ -56,23 +56,32 @@ function Player.new()
 		y = self.pos.y
 	}
 
+	self.deathParticle = ParticleGenerator.new()
+	self.deathParticle:init()
+
 	return self
 end
 
 -- Player is always moving, until death.
 function Player:update(dt)
 	if self.dying then
+		self.deathParticle.pos.x = self.pos.x
+		self.deathParticle.pos.y = self.pos.y
 		self.dead = true
+		self.deathParticle:update(dt)
+		if self.deathParticle.particleCount <= 0 then
+			self.dying = false
+		end
 	end
 	if self.dead then
 		return
 	end
 
 	if self.moveLeft then
-		self.rot = self.rot - 0.04
+		self.rot = self.rot - 2 * dt
 	end
 	if self.moveRight then
-		self.rot = self.rot + 0.04
+		self.rot = self.rot + 2 * dt
 	end
 
 	local newx = self.pos.x + math.cos(self.rot) * (self.velocity * dt)
@@ -122,7 +131,7 @@ function Player:update(dt)
 	for i = 1, #self.history - 10 do
 		-- we subtract 2 from the self.size to lower the preciseness a bit of collision.
 		if util:isColliding(self.pos, self.size, self.history[i], self.size - 2) then
-			self.dead = true
+			self:die()
 		end
 	end
 end
@@ -180,6 +189,10 @@ function Player:draw()
 	love.graphics.setColor(255, 255, 255)
 
 	love.graphics.line(self.pos.x, self.pos.y, endx, endy)
+
+	if self.dying then
+		self.deathParticle:draw()
+	end
 
 	--[[
 	love.graphics.setColor(255, 0, 0)
