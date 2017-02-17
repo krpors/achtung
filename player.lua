@@ -7,8 +7,6 @@ Player.__index = Player
 function Player.new()
 	local self = setmetatable({}, Player)
 
-	self.dying = false
-
 	self.moveLeft = false
 	self.moveRight = false
 
@@ -56,24 +54,15 @@ function Player.new()
 		y = self.pos.y
 	}
 
-	self.deathParticle = ParticleGenerator.new()
-	self.deathParticle:init()
+	self.deathParticles = nil
 
 	return self
 end
 
 -- Player is always moving, until death.
 function Player:update(dt)
-	if self.dying then
-		self.deathParticle.pos.x = self.pos.x
-		self.deathParticle.pos.y = self.pos.y
-		self.dead = true
-		self.deathParticle:update(dt)
-		if self.deathParticle.particleCount <= 0 then
-			self.dying = false
-		end
-	end
 	if self.dead then
+		self.deathParticles:update(dt)
 		return
 	end
 
@@ -154,7 +143,15 @@ function Player:stop()
 end
 
 function Player:die()
-	self.dying = true
+	-- Don't die twice ;) I.e. return prematurely.
+	if self.dead then
+		return
+	end
+
+	self.dead = true
+	self.deathParticles = ParticleGenerator.new(self.pos.x, self.pos.y)
+	self.deathParticles.color = { self.color.r, self.color.g, self.color.b, 255 }
+	self.deathParticles:init()
 end
 
 --[[
@@ -188,10 +185,10 @@ function Player:draw()
 
 	love.graphics.setColor(255, 255, 255)
 
-	love.graphics.line(self.pos.x, self.pos.y, endx, endy)
+	--love.graphics.line(self.pos.x, self.pos.y, endx, endy)
 
-	if self.dying then
-		self.deathParticle:draw()
+	if self.dead then
+		self.deathParticles:draw()
 	end
 
 	--[[

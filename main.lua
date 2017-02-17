@@ -13,7 +13,8 @@ function love.load()
 	player2 = Player.new()
 	player2.color = { r = 0, g = 255, b = 0}
 
-	pgen = ParticleGenerator.new()
+	pgen = ParticleGenerator.new(300, 400)
+	pgen:init()
 end
 
 function love.update(dt)
@@ -48,7 +49,10 @@ function love.keypressed(key)
 	elseif key == 'right' then player1:right()
 	elseif key == "a" then player2:left()
 	elseif key == "s" then player2:right()
-	elseif key == " " then pgen:init()
+	elseif key == " " then
+		pgen = ParticleGenerator.new(300, 400)
+		pgen:init()
+	elseif key == "d" then player1:die()
 	end
 end
 
