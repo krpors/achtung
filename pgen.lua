@@ -12,6 +12,9 @@ function ParticleGenerator.new(origin_x, origin_y)
 		y = origin_y
 	}
 
+	-- Set to true to loop the generator.
+	self.continuous = false
+
 	self.particles = {}
 	self.particleCount = 40
 	self.color = { 255, 0, 0, 255 }
@@ -20,24 +23,18 @@ function ParticleGenerator.new(origin_x, origin_y)
 end
 
 --[[
--- Initializes the particle generator with all the parameters involved.
+-- Initializes the particle generator with all the parameters involved. This will
+-- re-create the particles table (with zero particles), then initializes all particles
+-- with the given properties.
 --]]
 function ParticleGenerator:init()
 	self.particles = {}
 
 	for i = 1, self.particleCount do
 		local maxlife = love.math.random() * 2
-		local p = {
-			x         = self.pos.x,
-			y         = self.pos.y,
-			color     = self.color,
-			radius    = 10,
-			maxradius = 10,
-			dx        = love.math.random(-1000, 1000) / 1000,
-			dy        = love.math.random(-1000, 1000) / 1000,
-			life      = maxlife, -- life in seconds
-			maxlife   = maxlife  -- life maximum
-		}
+		local p = {}
+		self:resetParticle(p)
+
 		table.insert(self.particles, p)
 	end
 end
@@ -45,24 +42,25 @@ end
 --[[
 -- Resets a particle's parameters.
 --]]
-function ParticleGenerator:resetParticle(particle)
-	local p = {
-		x         = self.pos.x,
-		y         = self.pos.y,
-		color     = self.color,
-		radius    = 10,
-		maxradius = 10,
-		dx        = love.math.random(-1000, 1000) / 1000,
-		dy        = love.math.random(-1000, 1000) / 1000,
-		life      = maxlife, -- life in seconds
-		maxlife   = maxlife  -- life maximum
-	}
+function ParticleGenerator:resetParticle(p)
+	local maxlife = love.math.random() * 2
+	p.x         = self.pos.x
+	p.y         = self.pos.y
+	p.color     = self.color
+	p.radius    = 10
+	p.maxradius = 10
+	p.dx        = love.math.random(-1000, 1000) / 1000
+	p.dy        = love.math.random(-1000, 1000) / 1000
+	p.life      = maxlife -- life in seconds
+	p.maxlife   = maxlife -- life maximum
 end
 
--- ParticleGenerator is always moving, until death.
+--[[
+-- Updates the particle generator's particle positions, color, radius and whatever,
+-- every frame.
+--]]
 function ParticleGenerator:update(dt)
-	for i = 1, #self.particles do
-		local p = self.particles[i]
+	for k, p in ipairs(self.particles) do
 		if p and p.life >= 0 then
 			p.x = p.x + p.dx * dt * 80
 			p.y = p.y + p.dy * dt * 80
@@ -73,11 +71,9 @@ function ParticleGenerator:update(dt)
 			-- a radius of 0. We do that by just setting by calculating the
 			-- percentage of the lifetime, multiplied by the original max radius.
 			p.radius = p.maxradius * (p.life / p.maxlife)
-		elseif p.life < 0 then
-			p.life = p.maxlife
-			p.x = self.pos.x
-			p.y = self.pos.y
-			p.radius = p.maxradius
+		elseif p.life < 0 and self.continuous then
+			-- If we need to emit continuously, reset the particle.
+			self:resetParticle(p)
 		end
 	end
 end

@@ -73,6 +73,7 @@ function love.keypressed(key)
 	elseif key == "s" then player2:right()
 	elseif key == " " then
 		pgen = ParticleGenerator.new(300, 400)
+		pgen.continuous = true
 		pgen:init()
 	elseif key == "d" then player1:die()
 	elseif key == "r" then
