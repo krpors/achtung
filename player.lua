@@ -12,8 +12,7 @@ function Player.new()
 
 	-- Has the player just started? In that case, give the player some time to
 	-- move around and give him or her some room to re-pick the direction.
-	self.timeCounter = 0
-	self.starting = true
+	self.startupCounter = 5 -- seconds
 
 	-- Initialize random seed to place the player at a random position and
 	-- a random direction.
@@ -93,11 +92,10 @@ function Player:update(dt)
 	-- So, if the player is starting the game, give the player some time to move before
 	-- we actually start. No collision detection is done (we're returning prematurely).
 	-- By default, just use 5 seconds, which is just arbitrarily chosen.
-	if self.starting then
-		if self.timeCounter > 5 then
-			self.starting = false
-		end
-		self.timeCounter = self.timeCounter + dt
+	if self.startupCounter >= 0 then
+		self.startupCounter = self.startupCounter - dt
+		-- No further processing necessary, we're just starting. Return from the
+		-- function, don't do any path memorizing or collision detection.
 		return
 	end
 
@@ -116,10 +114,12 @@ function Player:update(dt)
 		self.counter = self.counter + 1
 	end
 
-	-- check if we are colliding with ourselves. If so, we lost.
+	-- check if we are colliding with ourselves. If so, we lost. We subtract 10 from the
+	-- history iteration, or else we'll be colliding with ourselves right away.
 	for i = 1, #self.history - 10 do
-		-- we subtract 2 from the self.size to lower the preciseness a bit of collision.
-		if util:isColliding(self.pos, self.size, self.history[i], self.size - 2) then
+		-- we divide self.size to lower the preciseness a bit of collision. Pixel perfect
+		-- is a bit too tight.
+		if util:isColliding(self.pos, self.size, self.history[i], self.size / 1.1) then
 			self:die()
 		end
 	end
@@ -164,7 +164,7 @@ function Player:collidesWith(otherPlayer)
 			x = otherPlayer.history[i].x,
 			y = otherPlayer.history[i].y
 		}
-		if util:isColliding(self.pos, self.size, otherPos, otherPlayer.size) then
+		if util:isColliding(self.pos, self.size, otherPos, otherPlayer.size / 1.1) then
 			return true
 		end
 	end
@@ -191,10 +191,19 @@ function Player:draw()
 		self.deathParticles:draw()
 	end
 
-	--[[
-	love.graphics.setColor(255, 0, 0)
-	love.graphics.print("Table size: " .. #self.history, 10, 10)
-	love.graphics.print("(x, y) = (" .. self.pos.x .. "," .. self.pos.y .. ")", 10, 25)
-	love.graphics.print("rot = " .. self.rot, 10, 35)
-	--]]
+	if globals.debug then
+		love.graphics.setFont(globals.gameFont)
+		love.graphics.setColor(255,255,255)
+		local str = ""
+		if self.dead then
+			str = str .. "Kaputt!\n"
+		end
+		str = str ..
+			"(" .. math.floor(self.pos.x) .. ", " .. math.floor(self.pos.y) .. ")\n" ..
+			"Trail size: " .. #self.history .. "\n" ..
+			"Moving left: " .. tostring(self.moveLeft) .. "\n" ..
+			"Moving right: " .. tostring(self.moveRight) .. "\n"
+
+		love.graphics.printf(str, self.pos.x, self.pos.y, 150, "left")
+	end
 end

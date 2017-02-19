@@ -1,6 +1,19 @@
 require "player"
 require "pgen"
 
+--[[
+-- A table with some global variables defined which can be used throughout the
+-- game. This table is not intended to keep state of the game, but rather some
+-- globally reusable resources such as images, or fonts. This somewhat allows
+-- us to put these things in their own 'namespace'.
+--]]
+globals = {
+	debug         = true,
+	gameFont      = nil,
+	gameFontLarge = nil
+}
+
+
 local delta = 0
 local player1
 local player2
@@ -13,6 +26,10 @@ local startCounterSize = 50
 local ticksSinceStart = 0
 
 function love.load()
+	local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+|/\\:;'\"<>,.?"
+	globals.gameFont      = love.graphics.newImageFont("font.png", glyphs)
+	globals.gameFontLarge = love.graphics.newImageFont("font-large.png", glyphs)
+
 	player1 = Player.new()
 	player1.color = { r = 255, g = 0, b = 0}
 	player2 = Player.new()
@@ -61,8 +78,11 @@ function love.draw()
 		pgen:draw()
 	end
 
-	love.graphics.setColor(255, 255, 255)
-	love.graphics.print(ticksSinceStart, 0, 0)
+	if globals.debug then
+		love.graphics.setFont(globals.gameFont)
+		love.graphics.setColor(255, 255, 255)
+		love.graphics.print("Ticks since start: " .. ticksSinceStart .. " seconds", 0, 0)
+	end
 end
 
 function love.keypressed(key)
@@ -75,7 +95,8 @@ function love.keypressed(key)
 		pgen = ParticleGenerator.new(300, 400)
 		pgen.continuous = true
 		pgen:init()
-	elseif key == "d" then player1:die()
+	elseif key == "x" then player1:die()
+	elseif key == "d" then globals.debug = not globals.debug
 	elseif key == "r" then
 		delta = 0
 		startCounter = 5
