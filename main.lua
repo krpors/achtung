@@ -1,4 +1,5 @@
 require "player"
+require "menu"
 require "pgen"
 
 --[[
@@ -13,6 +14,13 @@ globals = {
 	gameFontLarge = nil
 }
 
+
+local gameMenu = nil
+local btnPlay = nil
+local btnOptions = nil
+local btnQuit = nil
+
+local gameStarted = false
 
 local delta = 0
 local player1
@@ -30,6 +38,20 @@ function love.load()
 	globals.gameFont      = love.graphics.newImageFont("font.png", glyphs)
 	globals.gameFontLarge = love.graphics.newImageFont("font-large.png", glyphs)
 
+
+	gameMenu = Menu.new()
+
+	btnPlay = Button.new("Play!!1one")
+	btnPlay.action = function() gameStarted = true end
+	btnOptions = Button.new("Roflcoptions")
+	btnOptions.action = function() print("No action for options yet") end
+	btnQuit = Button.new("Quit :(")
+	btnQuit.action = function() love.event.quit() end
+
+	gameMenu:addButton(btnPlay)
+	gameMenu:addButton(btnOptions)
+	gameMenu:addButton(btnQuit)
+
 	player1 = Player.new()
 	player1.color = { r = 255, g = 0, b = 0}
 	player2 = Player.new()
@@ -38,61 +60,77 @@ end
 
 function love.update(dt)
 	ticksSinceStart = ticksSinceStart + dt
-	delta = delta + dt
-	if delta >= 1 then
-		startCounter = startCounter - 1
-		startCounterSize = 50
-		delta = 0
-	end
 
-	player1:update(dt)
-	player2:update(dt)
+	if gameStarted then
+		delta = delta + dt
+		if delta >= 1 then
+			startCounter = startCounter - 1
+			startCounterSize = 50
+			delta = 0
+		end
 
-	if player1:collidesWith(player2) then
-		player1:die()
-	end
-	if player2:collidesWith(player1) then
-		player2:die()
-	end
+		player1:update(dt)
+		player2:update(dt)
 
-	if pgen then
-		pgen:update(dt)
-	end
+		if player1:collidesWith(player2) then
+			player1:die()
+		end
+		if player2:collidesWith(player1) then
+			player2:die()
+		end
 
-	startCounterSize = math.max(startCounterSize - (dt * 50), 0)
+		if pgen then
+			pgen:update(dt)
+		end
+
+		startCounterSize = math.max(startCounterSize - (dt * 50), 0)
+	end
 end
 
+
 function love.draw()
-	if startCounter > 0 then
-		love.graphics.setColor(255, 255, 255)
-		love.graphics.print(startCounter, love.window.getWidth() / 2, love.window.getHeight() / 2, 0, startCounterSize, startCounterSize)
+	if gameStarted then
+		if startCounter > 0 then
+			love.graphics.setFont(globals.gameFontLarge)
+			love.graphics.setColor(255, 255, 255)
+			love.graphics.print(startCounter, love.window.getWidth() / 2, love.window.getHeight() / 2, 0, startCounterSize, startCounterSize)
+		end
+
+
+		player1:draw()
+		player2:draw()
+
+		-- TODO: draw death animation last, to make sure the animation is drawn on top
+		-- of everything else.
+
+		if pgen then
+			pgen:draw()
+		end
+	else
+		gameMenu:draw()
 	end
 
-	player1:draw()
-	player2:draw()
-
-	-- TODO: draw death animation last, to make sure the animation is drawn on top
-	-- of everything else.
-
-	if pgen then
-		pgen:draw()
-	end
 
 	if globals.debug then
 		love.graphics.setFont(globals.gameFont)
 		love.graphics.setColor(255, 255, 255)
 		love.graphics.print("Ticks since start: " .. ticksSinceStart .. " seconds", 0, 0)
 	end
+
 end
 
 function love.keypressed(key)
 	if key == 'escape' then love.event.quit()
 	elseif key == 'left' then player1:left()
 	elseif key == 'right' then player1:right()
+	elseif key == 'up' then gameMenu:focus(-1)
+	elseif key == 'down' then gameMenu:focus(1)
+	elseif key == "return" then gameMenu:fireEvent()
 	elseif key == "a" then player2:left()
 	elseif key == "s" then player2:right()
 	elseif key == " " then
 		pgen = ParticleGenerator.new(300, 400)
+		pgen.color = {120,200,255}
 		pgen.continuous = true
 		pgen:init()
 	elseif key == "x" then player1:die()
