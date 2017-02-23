@@ -1,3 +1,7 @@
+--[[
+-- A menu class, for holding Buttons and the like.
+--]]
+
 Menu = {}
 Menu.__index = Menu
 
@@ -70,7 +74,7 @@ function Menu:draw()
 	end
 end
 
-------------------------------------------------------------------------------
+--[[=========================================================================]]--
 --
 Button = {}
 Button.__index = Button
@@ -96,7 +100,6 @@ end
 function Button:align(button)
 	self.pos.y = button.pos.y + button.height + 10
 end
-
 function Button:update(dt)
 end
 
@@ -111,4 +114,69 @@ function Button:draw()
 	local x = love.window.getWidth() / 2 - (self.width / 2)
 	love.graphics.rectangle("line", x, self.pos.y, self.width, self.height)
 	love.graphics.print(self.text, x + 5, self.pos.y + 3)
+end
+
+--[[=========================================================================]]--
+
+--[[
+-- BobbingText is just a simple text, bobbing up and down (i.e. scaling). I stole
+-- the idea from Minecraft tbh. I found it fun to implement it so here it goes.
+--]]
+BobbingText = {}
+BobbingText.__index = BobbingText
+
+function BobbingText.new()
+	local self = setmetatable({}, BobbingText)
+
+	self.counter = 0
+	self.scaling = 1
+	self.color = 0
+
+	self.texts = {
+		"The newt bites you. You die...",
+		"Uaaaaarrrrrrrghhh!!!!",
+		"/r/love2d",
+		"\".....\"\n - Gordon Freeman",
+		"Hi thar ^_^",
+		"Segmentation fault",
+		"Core dumped.",
+		"You've got mail. Check your inbox!",
+		"Blue screen of death imminent... Or Linux?",
+		"Grab them by the pony.",
+		"e = 2.7182818284590452353602874...",
+		"This game is bugfree!",
+		"Use the source, Luke.",
+		"i = 0x5f3759df - (i >> 1); // what the f?",
+		"We have broken SHA-1 in practice.",
+		"When in doubt, print it out!",
+		"Bogosort is the best sort!",
+		"Fatal Error: NO_ERROR",
+		"It's true! It's fantastic. It's great!",
+		"Random number selected: 42",
+		"Tabs for indentation, spaces for alignment!",
+		"Kernel panic!",
+		"Click here to download more RAM!",
+		"tan(x) = sin(x)/cos(x)",
+	}
+
+	math.randomseed(os.time())
+	self:reset()
+
+	return self
+end
+
+function BobbingText:reset()
+	self.text = self.texts[math.random(#self.texts)]
+end
+
+function BobbingText:update(dt)
+	self.counter = self.counter + dt
+	self.scaling = math.abs(0.5 * math.sin(4 * self.counter)) + 2
+	self.color = math.abs(255 * math.sin(0.2 * self.counter))
+end
+
+function BobbingText:draw()
+	love.graphics.setFont(globals.gameFont)
+	love.graphics.setColor(225, 225, self.color)
+	love.graphics.printf(self.text, 400, 300, 300, "center", -0.2, self.scaling, self.scaling, 300 / 2)
 end

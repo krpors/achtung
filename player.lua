@@ -44,8 +44,6 @@ function Player.new()
 		y = love.math.random() * love.window.getHeight()
 	}
 
-	print("Player: " .. self.rot .. " at (x,y) = (" .. math.floor(self.pos.x) .. "," .. math.floor(self.pos.y) .. ")")
-
 	-- Our previous position, to calculate how many pixels we diverged, to know
 	-- whether we should insert something in the history table.
 	self.prevpos = {

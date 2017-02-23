@@ -16,6 +16,7 @@ globals = {
 
 
 local gameMenu = nil
+local bob = nil
 local btnPlay = nil
 local btnOptions = nil
 local btnQuit = nil
@@ -40,6 +41,8 @@ function love.load()
 
 
 	gameMenu = Menu.new()
+
+	bob = BobbingText.new("text")
 
 	btnPlay = Button.new("Play!!1one")
 	btnPlay.action = function() gameStarted = true end
@@ -85,6 +88,8 @@ function love.update(dt)
 
 		startCounterSize = math.max(startCounterSize - (dt * 50), 0)
 	end
+
+	bob:update(dt)
 end
 
 
@@ -93,7 +98,7 @@ function love.draw()
 		if startCounter > 0 then
 			love.graphics.setFont(globals.gameFontLarge)
 			love.graphics.setColor(255, 255, 255)
-			love.graphics.print(startCounter, love.window.getWidth() / 2, love.window.getHeight() / 2, 0, startCounterSize, startCounterSize)
+			love.graphics.printf(startCounter, love.window.getWidth() / 2, love.window.getHeight() / 2, 20, "center", 0, startCounterSize, startCounterSize, 20/2, 20/2)
 		end
 
 
@@ -108,6 +113,7 @@ function love.draw()
 		end
 	else
 		gameMenu:draw()
+		bob:draw()
 	end
 
 
@@ -120,7 +126,9 @@ function love.draw()
 end
 
 function love.keypressed(key)
-	if key == 'escape' then love.event.quit()
+	if key == 'escape' then
+		gameStarted = false
+		bob:reset()
 	elseif key == 'left' then player1:left()
 	elseif key == 'right' then player1:right()
 	elseif key == 'up' then gameMenu:focus(-1)
@@ -138,6 +146,7 @@ function love.keypressed(key)
 	elseif key == "r" then
 		delta = 0
 		startCounter = 5
+		startCounterSize = 50
 		player1 = Player.new()
 		player1.color = { r = 255, g = 0, b = 0}
 		player2 = Player.new()
