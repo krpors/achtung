@@ -1,6 +1,7 @@
 require "player"
 require "menu"
 require "pgen"
+require "fx"
 
 --[[
 -- A table with some global variables defined which can be used throughout the
@@ -11,11 +12,12 @@ require "pgen"
 globals = {
 	debug         = true,
 	gameFont      = nil,
-	gameFontLarge = nil
+	gameFontLarge = nil,
 }
 
 
 local gameMenu = nil
+local bgeffect = nil
 local bob = nil
 local btnPlay = nil
 local btnOptions = nil
@@ -34,13 +36,17 @@ local startCounterSize = 50
 
 local ticksSinceStart = 0
 
+local shaker = nil
+
 function love.load()
 	local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+|/\\:;'\"<>,.?"
 	globals.gameFont      = love.graphics.newImageFont("font.png", glyphs)
 	globals.gameFontLarge = love.graphics.newImageFont("font-large.png", glyphs)
 
+	shaker = Shaker.new()
 
 	gameMenu = Menu.new()
+	bgeffect = BgEffect.new()
 
 	bob = BobbingText.new("text")
 
@@ -64,36 +70,49 @@ end
 function love.update(dt)
 	ticksSinceStart = ticksSinceStart + dt
 
-	if gameStarted then
-		delta = delta + dt
-		if delta >= 1 then
-			startCounter = startCounter - 1
-			startCounterSize = 50
-			delta = 0
-		end
+	shaker:update(dt)
 
-		player1:update(dt)
-		player2:update(dt)
-
-		if player1:collidesWith(player2) then
-			player1:die()
-		end
-		if player2:collidesWith(player1) then
-			player2:die()
-		end
-
-		if pgen then
-			pgen:update(dt)
-		end
-
-		startCounterSize = math.max(startCounterSize - (dt * 50), 0)
+	if not gameStarted then
+		bgeffect:update(dt)
+		bob:update(dt)
+		return
 	end
 
-	bob:update(dt)
+	delta = delta + dt
+	if delta >= 1 then
+		startCounter = startCounter - 1
+		startCounterSize = 50
+		delta = 0
+	end
+
+	player1:update(dt)
+	player2:update(dt)
+
+	if player1:collidesWith(player2) and not player1.dead then
+		print("Player 1 died")
+		player1:die()
+		shaker:reset()
+		shaker.shaking = true
+	end
+	if player2:collidesWith(player1) and not player2.dead then
+		print("Player 2 died")
+		player2:die()
+		shaker:reset()
+		shaker.shaking = true
+	end
+
+	if pgen then
+		pgen:update(dt)
+	end
+
+
+	startCounterSize = math.max(startCounterSize - (dt * 50), 0)
 end
 
 
 function love.draw()
+	shaker:draw()
+
 	if gameStarted then
 		if startCounter > 0 then
 			love.graphics.setFont(globals.gameFontLarge)
@@ -112,6 +131,7 @@ function love.draw()
 			pgen:draw()
 		end
 	else
+		bgeffect:draw()
 		gameMenu:draw()
 		bob:draw()
 	end
@@ -136,6 +156,9 @@ function love.keypressed(key)
 	elseif key == "return" then gameMenu:fireEvent()
 	elseif key == "a" then player2:left()
 	elseif key == "s" then player2:right()
+	elseif key == "p" then
+		shaker:reset()
+		shaker.shaking = true
 	elseif key == " " then
 		pgen = ParticleGenerator.new(300, 400)
 		pgen.color = {120,200,255}

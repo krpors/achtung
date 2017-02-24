@@ -157,6 +157,7 @@ function BobbingText.new()
 		"Kernel panic!",
 		"Click here to download more RAM!",
 		"tan(x) = sin(x)/cos(x)",
+		"I have a theoretical degree in physics.",
 	}
 
 	math.randomseed(os.time())

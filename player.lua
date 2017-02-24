@@ -7,8 +7,13 @@ Player.__index = Player
 function Player.new()
 	local self = setmetatable({}, Player)
 
+	self.soundDeath = love.audio.newSource("boom.wav", "static")
+	self.soundDeath:setPitch(math.random() + 0.5)
+
 	self.moveLeft = false
 	self.moveRight = false
+
+	self.dead = false
 
 	-- Has the player just started? In that case, give the player some time to
 	-- move around and give him or her some room to re-pick the direction.
@@ -145,6 +150,9 @@ function Player:die()
 	if self.dead then
 		return
 	end
+
+	-- TODO here
+	self.soundDeath:play()
 
 	self.dead = true
 	self.deathParticles = ParticleGenerator.new(self.pos.x, self.pos.y)
