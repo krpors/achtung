@@ -55,7 +55,7 @@ function BgEffect:update(dt)
 	-- Update the rotation of the arc. This is used so the arc is rotated very slightly
 	-- each frame, to get a 'nice' visual effect (which is an opinion of course, but due
 	-- to lack of other ideas,,,)
-	self.rotation = self.rotation + dt / 30
+	self.rotation = self.rotation + dt / 20
 end
 
 function BgEffect:draw()
@@ -66,15 +66,19 @@ function BgEffect:draw()
 	-- The first arc will be drawn in one color, and the 'gaps' are filled with arcs
 	-- of a different color.
 	local step = math.pi / 16
+
+	local cx = love.window.getWidth() / 2
+	local cy = love.window.getHeight() / 2
+
 	for i = 0, 2*math.pi, step*2 do
 		local r1 = i
 		local r2 = i + step
 		-- Draw the yellow arcs
-		love.graphics.setColor(255, 255, 0, 20)
-		love.graphics.arc("fill", 200, 200, self.radius, r1 + self.rotation, r2 + self.rotation, 20)
+		love.graphics.setColor(255, 255, 255, 90)
+		love.graphics.arc("fill", cx, cy, self.radius, r1 + self.rotation, r2 + self.rotation, 20)
 		-- Draw the red arcs
-		love.graphics.setColor(255, 0, 0, 20)
-		love.graphics.arc("fill", 200, 200, self.radius, r1 + self.rotation + step, r2 + self.rotation + step, 20)
+		love.graphics.setColor(255, 0, 0, 90)
+		love.graphics.arc("fill", cx+5, cy+5, self.radius, r1 + self.rotation + step, r2 + self.rotation + step, 20)
 	end
 
 	love.graphics.setColor(0, 0, 0)

@@ -106,9 +106,9 @@ end
 function Button:draw()
 	love.graphics.setFont(globals.gameFontLarge)
 	if self.selected then
-		love.graphics.setColor(255, 10, 100)
+		love.graphics.setColor(255, 0, 0)
 	else
-		love.graphics.setColor(10, 255, 100)
+		love.graphics.setColor(255, 255, 255)
 	end
 
 	local x = love.window.getWidth() / 2 - (self.width / 2)

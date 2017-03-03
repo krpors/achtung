@@ -155,6 +155,7 @@ function love.keypressed(key)
 	elseif key == 'down' then gameMenu:focus(1)
 	elseif key == "return" then gameMenu:fireEvent()
 	elseif key == "a" then player2:left()
+	elseif key == "f" then love.window.setFullscreen(true)
 	elseif key == "s" then player2:right()
 	elseif key == "p" then
 		shaker:reset()
