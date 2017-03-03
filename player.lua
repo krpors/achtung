@@ -32,10 +32,13 @@ function Player.new()
 
 	-- Color of the player as a table with r, g, b properties.
 	self.color = {
-		r = 255,
-		g = 0,
-		b = 255
+		255,
+		0,
+		255
 	}
+
+	self.name = "Player"
+
 	-- Size of the player (radius)
 	self.size = 5
 	-- Rotation (direction) the player starts at.
@@ -116,16 +119,6 @@ function Player:update(dt)
 		self.prevpos.y = self.pos.y
 		self.counter = self.counter + 1
 	end
-
-	-- check if we are colliding with ourselves. If so, we lost. We subtract 10 from the
-	-- history iteration, or else we'll be colliding with ourselves right away.
-	for i = 1, #self.history - 10 do
-		-- we divide self.size to lower the preciseness a bit of collision. Pixel perfect
-		-- is a bit too tight.
-		if util:isColliding(self.pos, self.size, self.history[i], self.size / 1.1) then
-			self:die()
-		end
-	end
 end
 
 function Player:stop()
@@ -156,7 +149,7 @@ function Player:die()
 
 	self.dead = true
 	self.deathParticles = ParticleGenerator.new(self.pos.x, self.pos.y)
-	self.deathParticles.color = { self.color.r, self.color.g, self.color.b, 255 }
+	self.deathParticles.color = self.color
 	self.deathParticles:init()
 end
 
@@ -165,6 +158,22 @@ end
 -- the given otherPlayer by checking the otherPlayer's history table.
 --]]
 function Player:collidesWith(otherPlayer)
+	-- only check if we are not dead yet.
+	if self.dead then
+		return
+	end
+
+	-- check if we are colliding with ourselves. If so, we lost. We subtract 10 from the
+	-- history iteration, or else we'll be colliding with ourselves right away.
+	if otherPlayer == self then
+		for i = 1, #self.history - 10 do
+			if util:isColliding(self.pos, self.size, self.history[i], self.size / 1.1) then
+				return true
+			end
+		end
+		return false
+	end
+
 	for i = 1, #otherPlayer.history do
 		otherPos = {
 			x = otherPlayer.history[i].x,
@@ -178,7 +187,7 @@ function Player:collidesWith(otherPlayer)
 end
 
 function Player:draw()
-	love.graphics.setColor(self.color.r, self.color.g, self.color.b)
+	love.graphics.setColor(self.color)
 	for i = 1, #self.history do
 		love.graphics.circle("fill", self.history[i].x, self.history[i].y, self.size)
 	end
@@ -212,4 +221,8 @@ function Player:draw()
 
 		love.graphics.printf(str, self.pos.x, self.pos.y, 150, "left")
 	end
+end
+
+function Player:__tostring()
+	return string.format("Player '%s'", self.name)
 end

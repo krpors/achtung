@@ -26,8 +26,8 @@ local btnQuit = nil
 local gameStarted = false
 
 local delta = 0
-local player1
-local player2
+
+local players = {}
 
 local pgen = nil
 
@@ -61,10 +61,14 @@ function love.load()
 	gameMenu:addButton(btnOptions)
 	gameMenu:addButton(btnQuit)
 
-	player1 = Player.new()
-	player1.color = { r = 255, g = 0, b = 0}
-	player2 = Player.new()
-	player2.color = { r = 0, g = 255, b = 0}
+	local player = Player.new()
+	player.color = { 255, 0, 0 }
+	player.name = "Proxima"
+	table.insert(players, player)
+	player = Player.new()
+	player.color = { 0, 0, 255 }
+	player.name = "Centauri"
+	table.insert(players, player)
 end
 
 function love.update(dt)
@@ -85,20 +89,19 @@ function love.update(dt)
 		delta = 0
 	end
 
-	player1:update(dt)
-	player2:update(dt)
-
-	if player1:collidesWith(player2) and not player1.dead then
-		print("Player 1 died")
-		player1:die()
-		shaker:reset()
-		shaker.shaking = true
+	for k, v in pairs(players) do
+		v:update(dt)
 	end
-	if player2:collidesWith(player1) and not player2.dead then
-		print("Player 2 died")
-		player2:die()
-		shaker:reset()
-		shaker.shaking = true
+
+	-- Iterate through the players, and see if we collide with any other players... or ourselves!
+	for k, p1 in pairs(players) do
+		for k, p2 in pairs(players) do
+			if p1:collidesWith(p2) then
+				p1:die()
+				shaker:reset()
+				shaker.shaking = true
+			end
+		end
 	end
 
 	if pgen then
@@ -120,9 +123,9 @@ function love.draw()
 			love.graphics.printf(startCounter, love.window.getWidth() / 2, love.window.getHeight() / 2, 20, "center", 0, startCounterSize, startCounterSize, 20/2, 20/2)
 		end
 
-
-		player1:draw()
-		player2:draw()
+		for k, v in pairs(players) do
+			v:draw()
+		end
 
 		-- TODO: draw death animation last, to make sure the animation is drawn on top
 		-- of everything else.
@@ -149,14 +152,14 @@ function love.keypressed(key)
 	if key == 'escape' then
 		gameStarted = false
 		bob:reset()
-	elseif key == 'left' then player1:left()
-	elseif key == 'right' then player1:right()
+	elseif key == 'left' then players[1]:left()
+	elseif key == 'right' then players[1]:right()
 	elseif key == 'up' then gameMenu:focus(-1)
 	elseif key == 'down' then gameMenu:focus(1)
 	elseif key == "return" then gameMenu:fireEvent()
-	elseif key == "a" then player2:left()
+	elseif key == "a" then players[2]:left()
+	elseif key == "s" then players[2]:right()
 	elseif key == "f" then love.window.setFullscreen(true)
-	elseif key == "s" then player2:right()
 	elseif key == "p" then
 		shaker:reset()
 		shaker.shaking = true
@@ -165,25 +168,21 @@ function love.keypressed(key)
 		pgen.color = {120,200,255}
 		pgen.continuous = true
 		pgen:init()
-	elseif key == "x" then player1:die()
+	elseif key == "x" then players[1]:die()
 	elseif key == "d" then globals.debug = not globals.debug
 	elseif key == "r" then
 		delta = 0
 		startCounter = 5
 		startCounterSize = 50
-		player1 = Player.new()
-		player1.color = { r = 255, g = 0, b = 0}
-		player2 = Player.new()
-		player2.color = { r = 0, g = 0, b = 255}
 	end
 end
 
 function love.keyreleased(key)
 	if key == 'left' or key == 'right' then
-		player1:stop()
+		players[1]:stop()
 	end
 	if key == "a" or key == "s" then
-		player2:stop()
+		players[2]:stop()
 	end
 end
 
