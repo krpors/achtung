@@ -118,66 +118,29 @@ end
 
 --[[=========================================================================]]--
 
---[[
--- BobbingText is just a simple text, bobbing up and down (i.e. scaling). I stole
--- the idea from Minecraft tbh. I found it fun to implement it so here it goes.
---]]
-BobbingText = {}
-BobbingText.__index = BobbingText
+Scoreboard = {}
+Scoreboard.__index = Scoreboard
 
-function BobbingText.new()
-	local self = setmetatable({}, BobbingText)
+function Scoreboard.new()
+	local self = setmetatable({}, Scoreboard)
 
-	self.counter = 0
-	self.scaling = 1
-	self.color = 0
-
-	self.texts = {
-		"The newt bites you. You die...",
-		"Uaaaaarrrrrrrghhh!!!!",
-		"/r/love2d",
-		"\".....\"\n - Gordon Freeman",
-		"Hi thar ^_^",
-		"Segmentation fault",
-		"Core dumped.",
-		"You've got mail. Check your inbox!",
-		"Blue screen of death imminent... Or Linux?",
-		"Grab them by the pony.",
-		"e = 2.7182818284590452353602874...",
-		"This game is bugfree!",
-		"Use the source, Luke.",
-		"i = 0x5f3759df - (i >> 1); // what the f?",
-		"We have broken SHA-1 in practice.",
-		"When in doubt, print it out!",
-		"Bogosort is the best sort!",
-		"Fatal Error: NO_ERROR",
-		"It's true! It's fantastic. It's great!",
-		"Random number selected: 42",
-		"Tabs for indentation, spaces for alignment!",
-		"Kernel panic!",
-		"Click here to download more RAM!",
-		"tan(x) = sin(x)/cos(x)",
-		"I have a theoretical degree in physics.",
-	}
-
-	math.randomseed(os.time())
-	self:reset()
+	self.height = 100
 
 	return self
 end
 
-function BobbingText:reset()
-	self.text = self.texts[math.random(#self.texts)]
+function Scoreboard:draw()
+	local w = globals.playableArea.width
+	local h = globals.playableArea.height
+	love.graphics.setColor(0, 0, 0)
+	love.graphics.rectangle("fill", 0, h, w, h)
+	love.graphics.setLineWidth(0.4)
+	love.graphics.setColor(255, 255, 255)
+	love.graphics.line(0, h, love.window.getWidth(), h)
+	love.graphics.setColor(255, 255, 255)
+	love.graphics.line(0, h+3, love.window.getWidth(), h+3)
 end
 
-function BobbingText:update(dt)
-	self.counter = self.counter + dt
-	self.scaling = math.abs(0.5 * math.sin(4 * self.counter)) + 2
-	self.color = math.abs(255 * math.sin(0.2 * self.counter))
-end
+function Scoreboard:update(dt)
 
-function BobbingText:draw()
-	love.graphics.setFont(globals.gameFont)
-	love.graphics.setColor(225, 225, self.color)
-	love.graphics.printf(self.text, 400, 300, 300, "center", -0.2, self.scaling, self.scaling, 300 / 2)
 end

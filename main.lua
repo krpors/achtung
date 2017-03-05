@@ -10,9 +10,13 @@ require "fx"
 -- us to put these things in their own 'namespace'.
 --]]
 globals = {
-	debug         = true,
-	gameFont      = nil,
-	gameFontLarge = nil,
+	debug            = true,
+	gameFont         = nil,
+	gameFontLarge    = nil,
+	playableArea = {
+		width = love.window.getWidth(),
+		height = love.window.getHeight() - 100,
+	},
 }
 
 
@@ -37,6 +41,8 @@ local startCounterSize = 50
 local ticksSinceStart = 0
 
 local shaker = nil
+
+local scoreboard = nil
 
 function love.load()
 	local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+|/\\:;'\"<>,.?"
@@ -69,6 +75,8 @@ function love.load()
 	player.color = { 0, 0, 255 }
 	player.name = "Centauri"
 	table.insert(players, player)
+
+	scoreboard = Scoreboard.new()
 end
 
 function love.update(dt)
@@ -133,6 +141,8 @@ function love.draw()
 		if pgen then
 			pgen:draw()
 		end
+
+		scoreboard:draw()
 	else
 		bgeffect:draw()
 		gameMenu:draw()

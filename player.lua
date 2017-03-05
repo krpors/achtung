@@ -84,15 +84,15 @@ function Player:update(dt)
 	self.pos.x = newx
 	self.pos.y = newy
 
--- handle bounds of the screen.
-	if newx - self.size > love.window.getWidth() then
+	-- handle bounds of the screen.
+	if newx - self.size > globals.playableArea.width then
 		self.pos.x = 0 - self.size
 	elseif newx + self.size < 0 then
-		self.pos.x = love.window.getWidth() + self.size
-	elseif newy - self.size > love.window.getHeight() then
+		self.pos.x = globals.playableArea.width + self.size
+	elseif newy - self.size >= globals.playableArea.height then
 		self.pos.y = 0 - self.size;
-	elseif newy + self.size < 0 then
-		self.pos.y = love.window.getHeight() + self.size
+	elseif newy + self.size <= 0 then
+		self.pos.y = globals.playableArea.height - self.size
 	end
 
 	-- So, if the player is starting the game, give the player some time to move before
@@ -214,7 +214,7 @@ function Player:draw()
 			str = str .. "Kaputt!\n"
 		end
 		str = str ..
-			"(" .. math.floor(self.pos.x) .. ", " .. math.floor(self.pos.y) .. ")\n" ..
+			self.name .. " (" .. math.floor(self.pos.x) .. ", " .. math.floor(self.pos.y) .. ")\n" ..
 			"Trail size: " .. #self.history .. "\n" ..
 			"Moving left: " .. tostring(self.moveLeft) .. "\n" ..
 			"Moving right: " .. tostring(self.moveRight) .. "\n"
