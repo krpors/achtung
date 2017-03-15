@@ -15,6 +15,9 @@ function Player.new()
 
 	self.dead = false
 
+	-- The score of the player, simply incremented every frame
+	self.score = 0
+
 	-- Has the player just started? In that case, give the player some time to
 	-- move around and give him or her some room to re-pick the direction.
 	self.startupCounter = 5 -- seconds
@@ -104,6 +107,8 @@ function Player:update(dt)
 		-- function, don't do any path memorizing or collision detection.
 		return
 	end
+
+	self.score = self.score + 1
 
 	-- To prevent lots of inserts into the history table (e.g. the paths we have followed as
 	-- a player), make sure some threshold is used. Once a player has moved this amount of pixels,

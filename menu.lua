@@ -125,6 +125,7 @@ function Scoreboard.new()
 	local self = setmetatable({}, Scoreboard)
 
 	self.height = 100
+	self.players = nil
 
 	return self
 end
@@ -132,13 +133,33 @@ end
 function Scoreboard:draw()
 	local w = globals.playableArea.width
 	local h = globals.playableArea.height
+
 	love.graphics.setColor(0, 0, 0)
 	love.graphics.rectangle("fill", 0, h, w, h)
-	love.graphics.setLineWidth(0.4)
+	love.graphics.setLineWidth(1)
 	love.graphics.setColor(255, 255, 255)
 	love.graphics.line(0, h, love.window.getWidth(), h)
 	love.graphics.setColor(255, 255, 255)
 	love.graphics.line(0, h+3, love.window.getWidth(), h+3)
+
+	love.graphics.setFont(globals.gameFontLarge)
+
+	-- For each player, draw the score.
+	for k, v in ipairs(self.players) do
+		local posx = w / 4 * (k - 1)
+		local w2 = w / 4
+
+		local color = { v.color[1] / 4, v.color[2] / 4, v.color[3] / 4 }
+		love.graphics.setColor(color)
+		love.graphics.rectangle("fill", posx, h, w2, h)
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.print(v.name .. ": " .. v.score, posx + 10 + 1, h+16 + 1)
+		love.graphics.setColor(v.color)
+		love.graphics.print(v.name .. ": " .. v.score, posx + 10, h+16)
+
+		if v.dead then
+		end
+	end
 end
 
 function Scoreboard:update(dt)

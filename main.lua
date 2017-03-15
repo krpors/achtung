@@ -15,7 +15,7 @@ globals = {
 	gameFontLarge    = nil,
 	playableArea = {
 		width = love.window.getWidth(),
-		height = love.window.getHeight() - 100,
+		height = love.window.getHeight() - 50,
 	},
 }
 
@@ -45,6 +45,8 @@ local shaker = nil
 local scoreboard = nil
 
 function love.load()
+	love.graphics.setDefaultFilter("nearest", "nearest")
+
 	local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+|/\\:;'\"<>,.?"
 	globals.gameFont      = love.graphics.newImageFont("font.png", glyphs)
 	globals.gameFontLarge = love.graphics.newImageFont("font-large.png", glyphs)
@@ -75,8 +77,17 @@ function love.load()
 	player.color = { 0, 0, 255 }
 	player.name = "Centauri"
 	table.insert(players, player)
+	player = Player.new()
+	player.color = { 0, 255, 255 }
+	player.name = "Sirius"
+	table.insert(players, player)
+	player = Player.new()
+	player.color = { 255, 0, 255 }
+	player.name = "Alnitak"
+	table.insert(players, player)
 
 	scoreboard = Scoreboard.new()
+	scoreboard.players = players
 end
 
 function love.update(dt)
