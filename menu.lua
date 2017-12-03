@@ -100,18 +100,24 @@ end
 function Button:align(button)
 	self.pos.y = button.pos.y + button.height + 10
 end
+
 function Button:update(dt)
 end
 
 function Button:draw()
+	local x = love.window.getWidth() / 2 - (self.width / 2)
+
 	love.graphics.setFont(globals.gameFontLarge)
+
+	love.graphics.setColor(0, 0, 0)
+	love.graphics.rectangle("fill", x, self.pos.y, self.width, self.height)
+
 	if self.selected then
 		love.graphics.setColor(255, 0, 0)
 	else
 		love.graphics.setColor(255, 255, 255)
 	end
 
-	local x = love.window.getWidth() / 2 - (self.width / 2)
 	love.graphics.rectangle("line", x, self.pos.y, self.width, self.height)
 	love.graphics.print(self.text, x + 5, self.pos.y + 3)
 end

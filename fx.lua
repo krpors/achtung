@@ -47,42 +47,50 @@ BgEffect.__index = BgEffect
 function BgEffect.new()
 	local self = setmetatable({}, BgEffect)
 	self.rotation = 0
-	self.radius = 1024
+	self.radius = 0
+	self:init()
 	return self
 end
 
+function BgEffect:init()
+	self.circlecount = 50
+	self.circles = {}
+
+	for i = 1, self.circlecount do
+		local c = {}
+		self:resetCircle(c)
+		table.insert(self.circles, c)
+	end
+end
+
+function BgEffect:resetCircle(c)
+	c.radius = 1
+	c.life = love.math.random() * 40
+	c.x = love.math.random() * love.window.getWidth()
+	c.y = love.math.random() * love.window.getWidth()
+	c.color = {
+		love.math.random() * 255,
+		love.math.random() * 255,
+		love.math.random() * 255
+	}
+end
+
 function BgEffect:update(dt)
-	-- Update the rotation of the arc. This is used so the arc is rotated very slightly
-	-- each frame, to get a 'nice' visual effect (which is an opinion of course, but due
-	-- to lack of other ideas,,,)
-	self.rotation = self.rotation + dt / 20
+	for i, c in ipairs(self.circles) do
+		c.radius = c.radius + 1 * dt * love.math.random() * 18
+		c.x = c.x + love.math.random(-1, 1)
+		c.y = c.y + love.math.random(-1, 1)
+		if c.radius > c.life then
+			self:resetCircle(c)
+		end
+	end
 end
 
 function BgEffect:draw()
-	-- We are drawing arcs here. We want 16 segments, so we define the step counter.
-	-- We need to iterate through a whole circumference (2 * pi), and we're stepping
-	-- twice the stepcount so we can create a 'gap' between each segment.
-	--
-	-- The first arc will be drawn in one color, and the 'gaps' are filled with arcs
-	-- of a different color.
-	local step = math.pi / 16
-
-	local cx = love.window.getWidth() / 2
-	local cy = love.window.getHeight() / 2
-
-	for i = 0, 2*math.pi, step*2 do
-		local r1 = i
-		local r2 = i + step
-		-- Draw the yellow arcs
-		love.graphics.setColor(255, 255, 255, 90)
-		love.graphics.arc("fill", cx, cy, self.radius, r1 + self.rotation, r2 + self.rotation, 20)
-		-- Draw the red arcs
-		love.graphics.setColor(255, 0, 0, 90)
-		love.graphics.arc("fill", cx+5, cy+5, self.radius, r1 + self.rotation + step, r2 + self.rotation + step, 20)
+	for i, c in ipairs(self.circles) do
+		love.graphics.setColor(c.color)
+		love.graphics.circle("fill", c.x, c.y, c.radius)
 	end
-
-	love.graphics.setColor(0, 0, 0)
-	love.graphics.rectangle("fill", 0, 200, love.window.getWidth(), 400)
 end
 
 --[[=========================================================================]]--
@@ -105,7 +113,6 @@ function BobbingText.new()
 		"The newt bites you. You die...",
 		"Uaaaaarrrrrrrghhh!!!!",
 		"/r/love2d",
-		"\".....\"\n - Gordon Freeman",
 		"Hi thar ^_^",
 		"Segmentation fault",
 		"Core dumped.",
@@ -127,6 +134,10 @@ function BobbingText.new()
 		"Click here to download more RAM!",
 		"tan(x) = sin(x)/cos(x)",
 		"I have a theoretical degree in physics.",
+		"Save net neutrality!",
+		"Squad CoverUp - Writing Tomorrow's Legacy!",
+		"Justice is right, justice is wrong, justice is done!",
+		"Scrum is overrated."
 	}
 
 	math.randomseed(os.time())
@@ -146,6 +157,11 @@ function BobbingText:update(dt)
 end
 
 function BobbingText:draw()
+	love.graphics.setColor(50, 20, self.color)
+	love.graphics.rotate(-0.2)
+	love.graphics.rectangle("fill", -100, 350, love.window.getWidth() + 300, 70)
+
+	love.graphics.rotate(0.2)
 	love.graphics.setFont(globals.gameFont)
 	love.graphics.setColor(225, 225, self.color)
 	love.graphics.printf(self.text, 400, 300, 300, "center", -0.2, self.scaling, self.scaling, 300 / 2)
