@@ -29,6 +29,14 @@ function Menu:addButton(button)
 	table.insert(self.buttons, button)
 end
 
+function Menu:selectFirst()
+	for k, v in ipairs(self.buttons) do
+		v.selected = false
+	end
+
+	self.buttons[1].selected = true
+end
+
 --[[
 -- Dumb circular list kind of implementation. If the last item is selected and
 -- then the next one is selected, we rotate towards the beginning. Same thing
@@ -63,12 +71,21 @@ function Menu:fireEvent()
 end
 
 function Menu:update(dt)
+	self.pos = {
+		x = (love.window.getWidth() / 2) - (self.width / 2),
+		y = love.window.getHeight() / 2
+	}
+
 	for k, v in ipairs(self.buttons) do
 		v:update(dt)
 	end
 end
 
 function Menu:draw()
+	-- draw background under buttons
+	love.graphics.setColor(50, 50, 50)
+	love.graphics.rectangle("fill", self.pos.x - 30, 0, self.width + 60, love.window.getHeight())
+
 	for k, v in ipairs(self.buttons) do
 		v:draw()
 	end

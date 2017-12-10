@@ -5,7 +5,7 @@ require "fx"
 
 --[[
 -- A table with some global variables defined which can be used throughout the
--- game. This table is not intended to keep state of the game, but rather some
+--  This table is not intended to keep state of the game, but rather some
 -- globally reusable resources such as images, or fonts. This somewhat allows
 -- us to put these things in their own 'namespace'.
 --]]
@@ -19,14 +19,25 @@ globals = {
 	},
 }
 
+menu = {
+	currentMenu,
+	main,
+	options,
+}
 
-local gameMenu = nil
+button = {
+	play,
+	options,
+	quit,
+	players,
+	back,
+}
+
+-- Effects
 local bgeffect = nil
 local bob = nil
-local btnPlay = nil
-local btnOptions = nil
-local btnQuit = nil
 
+-- Others
 local gameStarted = false
 
 local delta = 0
@@ -44,31 +55,44 @@ local shaker = nil
 
 local scoreboard = nil
 
-function love.load()
-	love.graphics.setDefaultFilter("nearest", "nearest")
+local gameState = nil
 
-	local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+|/\\:;'\"<>,.?"
-	globals.gameFont      = love.graphics.newImageFont("font.png", glyphs)
-	globals.gameFontLarge = love.graphics.newImageFont("font-large.png", glyphs)
+function initMenu()
+	menu.main = Menu.new()
+	menu.options = Menu.new()
 
-	shaker = Shaker.new()
+	button.play = Button.new("Start :)")
+	button.play.action = function() gameStarted = true end
 
-	gameMenu = Menu.new()
-	bgeffect = BgEffect.new()
+	button.options = Button.new("Options")
+	button.options.action = function()
+		menu.currentMenu = menu.options
+		menu.currentMenu:selectFirst()
+	end
 
-	bob = BobbingText.new("text")
+	button.quit = Button.new("Quit :(")
+	button.quit.action = function() love.event.quit() end
 
-	btnPlay = Button.new("Play!!1one")
-	btnPlay.action = function() gameStarted = true end
-	btnOptions = Button.new("Roflcoptions")
-	btnOptions.action = function() print("No action for options yet") end
-	btnQuit = Button.new("Quit :(")
-	btnQuit.action = function() love.event.quit() end
+	menu.main:addButton(button.play)
+	menu.main:addButton(button.options)
+	menu.main:addButton(button.quit)
 
-	gameMenu:addButton(btnPlay)
-	gameMenu:addButton(btnOptions)
-	gameMenu:addButton(btnQuit)
 
+	button.players = Button.new("Add player")
+	button.back = Button.new("Back")
+
+	button.back.action = function()
+		menu.currentMenu = menu.main
+		menu.currentMenu:selectFirst()
+	end
+
+	menu.options:addButton(button.players)
+	menu.options:addButton(button.back)
+
+	menu.currentMenu = menu.main
+end
+
+function initPlayers()
 	local player = Player.new()
 	player.color = { 255, 0, 0 }
 	player.name = "Proxima"
@@ -85,9 +109,26 @@ function love.load()
 	player.color = { 255, 0, 255 }
 	player.name = "Alnitak"
 	table.insert(players, player)
+end
+
+function love.load()
+	love.graphics.setDefaultFilter("nearest", "nearest")
+
+	local glyphs = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+|/\\:;'\"<>,.?"
+	globals.gameFont      = love.graphics.newImageFont("font.png", glyphs)
+	globals.gameFontLarge = love.graphics.newImageFont("font-large.png", glyphs)
+
+	shaker = Shaker.new()
+	bgeffect = BgEffect.new()
+	bob = BobbingText.new("text")
+
+	initMenu()
+	initPlayers()
 
 	scoreboard = Scoreboard.new()
 	scoreboard.players = players
+
+	gameState = currentMenu
 end
 
 function love.update(dt)
@@ -98,6 +139,7 @@ function love.update(dt)
 	if not gameStarted then
 		bgeffect:update(dt)
 		bob:update(dt)
+		menu.currentMenu:update(dt)
 		return
 	end
 
@@ -156,7 +198,7 @@ function love.draw()
 		scoreboard:draw()
 	else
 		bgeffect:draw()
-		gameMenu:draw()
+		menu.currentMenu:draw()
 		bob:draw()
 	end
 
@@ -175,9 +217,9 @@ function love.keypressed(key)
 		bob:reset()
 	elseif key == 'left' then players[1]:left()
 	elseif key == 'right' then players[1]:right()
-	elseif key == 'up' then gameMenu:focus(-1)
-	elseif key == 'down' then gameMenu:focus(1)
-	elseif key == "return" then gameMenu:fireEvent()
+	elseif key == 'up' then menu.currentMenu:focus(-1)
+	elseif key == 'down' then menu.currentMenu:focus(1)
+	elseif key == "return" then menu.currentMenu:fireEvent()
 	elseif key == "a" then players[2]:left()
 	elseif key == "s" then players[2]:right()
 	elseif key == "f" then love.window.setFullscreen(true)

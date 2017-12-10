@@ -25,7 +25,7 @@ end
 function Shaker:update(dt)
 	if self.shaking then
 		self.delta = self.delta + dt
-		self.y = math.sin(109 * self.delta - self.delta) / self.delta
+		self.y = math.sin(100 * self.delta - self.delta) / self.delta
 		if self.delta >= 2 then
 			self:reset()
 		end
